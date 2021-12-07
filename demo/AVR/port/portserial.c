@@ -27,6 +27,7 @@
 #include <avr/interrupt.h>
 #include <avr/signal.h>
 
+#include <util/delay.h>
 #include "port.h"
 
 /* ----------------------- Modbus includes ----------------------------------*/
@@ -102,7 +103,10 @@ xMBPortSerialInit( UCHAR ucPORT, ULONG ulBaudRate, UCHAR ucDataBits, eMBParity e
             break;
     }
 
-#if defined (__AVR_ATmega168__)
+#if defined (__AVR_ATmega168__) || defined (__AVR_ATmega328__) || \
+    defined (__AVR_ATmega328P__) || defined (__AVR_ATmega328PB__) || \
+    defined (__AVR_ATmega2560__) || defined (__AVR_ATmega2561__) || \
+    defined (__AVR_ATmega32U4__)
     UCSRC |= ucUCSRC;
 #elif defined (__AVR_ATmega169__)
     UCSRC |= ucUCSRC;
@@ -114,6 +118,8 @@ xMBPortSerialInit( UCHAR ucPORT, ULONG ulBaudRate, UCHAR ucDataBits, eMBParity e
     UCSRC = _BV( URSEL ) | ucUCSRC;
 #elif defined (__AVR_ATmega128__)
     UCSRC |= ucUCSRC;
+#else
+#error "Unsupported device"
 #endif
 
     vMBPortSerialEnable( FALSE, FALSE );
@@ -138,20 +144,23 @@ xMBPortSerialGetByte( CHAR * pucByte )
     return TRUE;
 }
 
-SIGNAL( SIG_USART_DATA )
+/* These signal vectors where changed!
+ * http://www.nongnu.org/avr-libc/user-manual/group__avr__interrupts.html
+ */
+ISR( USART_UDRE_vect )
 {
     pxMBFrameCBTransmitterEmpty(  );
 }
 
-SIGNAL( SIG_USART_RECV )
+ISR( USART_RX_vect )
 {
     pxMBFrameCBByteReceived(  );
 }
 
 #ifdef RTS_ENABLE
-SIGNAL( SIG_UART_TRANS )
+ISR( USART_TX_vect )
 {
-    RTS_LOW;
+    RTS_LOW
 }
 #endif
 

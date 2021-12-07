@@ -1,0 +1,8 @@
+.history
+*.elf
+*.hex
+*.eep
+*.map
+*.o
+*.d
+

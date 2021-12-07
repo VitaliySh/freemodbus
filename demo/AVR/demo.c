@@ -29,7 +29,16 @@
 
 /* ----------------------- Defines ------------------------------------------*/
 #define REG_INPUT_START 1000
-#define REG_INPUT_NREGS 4
+#define REG_INPUT_NREGS 10
+
+/*! \brief If Modbus ASCII support is enabled. */
+#define MB_ASCII_ENABLED                        ( 0 )
+
+/*! \brief If Modbus RTU support is enabled. */
+#define MB_RTU_ENABLED                          ( 1 )
+
+/*! \brief If Modbus TCP support is enabled. */
+#define MB_TCP_ENABLED                          ( 0 )
 
 /* ----------------------- Static variables ---------------------------------*/
 static USHORT   usRegInputStart = REG_INPUT_START;
@@ -42,8 +51,8 @@ main( void )
     const UCHAR     ucSlaveID[] = { 0xAA, 0xBB, 0xCC };
     eMBErrorCode    eStatus;
 
-    eStatus = eMBInit( MB_RTU, 0x0A, 0, 38400, MB_PAR_EVEN );
-
+//                      Proto       ID      USART       Baud    Parity
+    eStatus = eMBInit(  MB_RTU,     0x01,   0,          9600,  MB_PAR_NONE );
     eStatus = eMBSetSlaveID( 0x34, TRUE, ucSlaveID, 3 );
     sei(  );
 
@@ -56,6 +65,8 @@ main( void )
 
         /* Here we simply count the number of poll cycles. */
         usRegInputBuf[0]++;
+        usRegInputBuf[1]=1;
+        usRegInputBuf[2]=2;
     }
 }
 

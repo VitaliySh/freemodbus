@@ -60,10 +60,71 @@ typedef long    LONG;
 #define FALSE           0
 #endif
 
-/* ----------------------- AVR platform specifics ---------------------------*/
 
-#if defined (__AVR_ATmega168__)
+#define RTS_ENABLE      (1)
+
+/* ----------------------- AVR platform specifics ---------------------------*/
+#if defined (__AVR_ATmega32U4__)
+#define UCSRB           UCSR1B  // Port reg
+#define UBRR            UBRR1   // Port reg 16 bit
+#define UCSRC           UCSR1C  // Port reg 8 bit
+#define UDR             UDR1    // Port data register
+#define USART_UDRE_vect USART1_UDRE_vect
+#define USART_RX_vect   USART1_RX_vect
+#define USART_TX_vect   USART1_TX_vect
+
+#define TXEN            TXEN1
+#define RXEN            RXEN1
+#define RXCIE           RXCIE1
+#define TXCIE           TXCIE1
+#define UDRE            UDRE1
+#define UPM1            UPM11
+#define UPM0            UPM10
+#define UCSZ0           UCSZ10
+#define UCSZ1           UCSZ11
+#define SIG_UART_TRANS  SIG_USART_TRANS
+
+#elif defined (__AVR_ATmega2560__) || defined (__AVR_ATmega2561__) || defined (__AVR_ATmega328PB__)
+			/* USB & Pins 0(RX), 1(TX) On mini mega bard: */
+#define USART0
+			/* Pins 19(RX), 18(TX) On mini megea board: */
+// #define USART1
+
+#ifdef USART0
+#define UCSRB           UCSR0B  // Port reg
+#define UBRR            UBRR0   // Port reg 16 bit
+#define UCSRC           UCSR0C  // Port reg 8 bit
+#define UDR             UDR0    // Port data register
+#define USART_UDRE_vect USART0_UDRE_vect
+#define USART_RX_vect   USART0_RX_vect
+#define USART_TX_vect   USART0_TX_vect
+#endif
+
+#ifdef USART1
+#define UCSRB           UCSR1B  // Port reg
+#define UBRR            UBRR1   // Port reg 16 bit
+#define UCSRC           UCSR1C  // Port reg 8 bit
+#define UDR             UDR1    // Port data register
+#define USART_UDRE_vect USART1_UDRE_vect
+#define USART_RX_vect   USART1_RX_vect
+#define USART_TX_vect   USART1_TX_vect
+#endif
+
+#define TXEN            TXEN0
+#define RXEN            RXEN0
+#define RXCIE           RXCIE0
+#define TXCIE           TXCIE0
+#define UDRE            UDRE0
+#define UPM1            UPM01
+#define UPM0            UPM00
+#define UCSZ0           UCSZ00
+#define UCSZ1           UCSZ01
+#define SIG_UART_TRANS  SIG_USART_TRANS
+
+#elif defined (__AVR_ATmega328__) || defined (__AVR_ATmega328P__)
 #define UCSRB           UCSR0B
+#define UDR             UDR0
+
 #define TXEN            TXEN0
 #define RXEN            RXEN0
 #define RXCIE           RXCIE0
@@ -75,7 +136,23 @@ typedef long    LONG;
 #define UPM0            UPM00
 #define UCSZ0           UCSZ00
 #define UCSZ1           UCSZ01
+#define SIG_UART_TRANS  SIG_USART_TRANS
+
+#elif defined (__AVR_ATmega168__)
+#define UCSRB           UCSR0B
 #define UDR             UDR0
+
+#define TXEN            TXEN0
+#define RXEN            RXEN0
+#define RXCIE           RXCIE0
+#define TXCIE           TXCIE0
+#define UDRE            UDRE0
+#define UBRR            UBRR0
+#define UCSRC           UCSR0C
+#define UPM1            UPM01
+#define UPM0            UPM00
+#define UCSZ0           UCSZ00
+#define UCSZ1           UCSZ01
 #define SIG_UART_TRANS  SIG_USART_TRANS
 
 #elif defined (__AVR_ATmega169__)
@@ -116,7 +193,8 @@ typedef long    LONG;
 #define UPM0            UPM00
 #define UPM1            UPM01
 #define UCSRC           UCSR0C
-
+#else
+#error "Unsupported device"
 #endif
 
 /* ----------------------- RS485 specifics ----------------------------------*/
@@ -142,6 +220,8 @@ typedef long    LONG;
         RTS_PORT &= ~( _BV( RTS_PIN ) ); \
     } while( 0 );
 
+#else
+#error "RTS_ENABLE needed for RS485 half-duplex communication"
 #endif
 
 #endif

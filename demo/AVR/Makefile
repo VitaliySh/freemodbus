@@ -4,12 +4,18 @@
 
 ## General Flags
 PROJECT = demo
-MCU = atmega168
+
+# MCU = atmega168
+# MCU = atmega328p
+# MCU = atmega328pb
+# MCU = atmega2560
+MCU = atmega32u4
+
 TARGET = demo
 
-CC=/opt/gcc-avr/bin/avr-gcc
-OBJCOPY=/opt/gcc-avr/bin/avr-objcopy
-AVRDUDE=/opt/gcc-avr/bin/avrdude
+CC=avr-gcc
+OBJCOPY=avr-objcopy
+AVRDUDE=avrdude
 
 ## Options common to compile, link and assembly rules
 COMMON = -mmcu=$(MCU)
@@ -18,7 +24,7 @@ COMMON = -mmcu=$(MCU)
 CFLAGS = $(COMMON) \
 		 -Iport -I. \
 		 -I../../modbus/rtu -I../../modbus/ascii -I../../modbus/include 
-CFLAGS += -Wall -gstabs -DF_CPU=20000000UL  -Os -Wall -Wstrict-prototypes
+CFLAGS += -Wall -gstabs -DF_CPU=16000000UL  -Os -Wall -Wstrict-prototypes
 
 CFLAGS += -Wp,-M,-MP,-MT,$(*F).o,-MF,dep/$(@F).d 
 
@@ -58,7 +64,7 @@ MBOBJECTS = ../../modbus/mb.o \
 
 
 ## Build
-all: $(TARGET).elf $(TARGET).cof $(TARGET).hex $(TARGET).eep 
+all: $(TARGET).elf $(TARGET).hex $(TARGET).eep
 
 ## Compile
 demo.o: demo.c
@@ -71,13 +77,6 @@ $(TARGET).elf: $(OBJECTS) $(MBOBJECTS) $(MBPORTOBJECTS)
 %.hex: $(TARGET).elf
 	$(OBJCOPY) -O ihex $(HEX_FLASH_FLAGS)  $< $@
 
-%.cof: $(TARGET).elf
-	$(OBJCOPY) --debugging \
-		--change-section-address .data-0x800000 \
-		--change-section-address .bss-0x800000 \
-		--change-section-address .noinit-0x800000 \
-		--change-section-address .eeprom-0x810000 -O coff-avr $< $@
-
 %.eep: $(TARGET).elf
 	$(OBJCOPY) $(HEX_EEPROM_FLAGS) -O ihex $< $@
 
@@ -85,17 +84,13 @@ $(TARGET).elf: $(OBJECTS) $(MBOBJECTS) $(MBPORTOBJECTS)
 	$(OBJCOPY) -h -S $< > $@
 
 flash:
-	$(AVRDUDE) -p m168 -c stk200 -U flash:w:$(TARGET).hex				
-
-#size: ${TARGET}
-#	@echo
-#	@sh avr-mem.sh ${TARGET} ${MCU}
+	$(AVRDUDE) -p m328p -c stk200 -U flash:w:$(TARGET).hex
 
 ## Clean target
 .PHONY: clean
 clean:
 	-rm -rf $(OBJECTS) $(MBOBJECTS) $(MBPORTOBJECTS) 
-	-rm -rf $(TARGET).elf $(TARGET).hex $(TARGET).eep $(TARGET).cof $(TARGET).map
+	-rm -rf $(TARGET).elf $(TARGET).hex $(TARGET).eep $(TARGET).map
 	-rm -rf dep
 
 ## Other dependencies
